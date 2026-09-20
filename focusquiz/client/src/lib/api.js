@@ -37,3 +37,21 @@ export function saveSession(summary) {
   const storable = { ...summary, chunks: summary.chunks.map(({ text, ...rest }) => rest) };
   return call('/api/sessions', { method: 'POST', body: JSON.stringify(storable) });
 }
+// ---- study material sources ----
+async function readJson(res, fallback) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `${fallback} (${res.status})`);
+  return data;
+}
+
+// Upload .txt / .md / .pdf / .docx. Returns { title, text }.
+export async function extractFile(file) {
+  const form = new FormData();
+  form.append('file', file); // no content-type header: the browser sets the multipart boundary
+  return readJson(await fetch('/api/extract', { method: 'POST', body: form }), 'Upload failed');
+}
+
+// YouTube link -> transcript as timestamped paragraphs. Returns { title, videoId, text }.
+export async function fetchYoutube(url) {
+  return readJson(await fetch(`/api/youtube?url=${encodeURIComponent(url)}`), 'Could not fetch the transcript');
+}
