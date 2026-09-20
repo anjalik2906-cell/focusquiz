@@ -1,0 +1,16 @@
+{
+  "name": "focusquiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Study focus tracker that quizzes you on what you were reading when your attention drifted.",
+  "scripts": {
+    "setup": "npm install && npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently -n server,client -c blue,magenta \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "build": "npm run build --prefix client",
+    "start": "npm run build && npm start --prefix server",
+    "test": "node --test \"client/src/lib/*.test.js\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

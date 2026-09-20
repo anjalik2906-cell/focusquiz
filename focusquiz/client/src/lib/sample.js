@@ -1,0 +1,7 @@
+export const SAMPLE_TEXT = [
+  'A hash map stores key-value pairs and offers average constant-time lookup. It works by passing each key through a hash function, which converts the key into an integer index inside an internal array. Good hash functions spread keys evenly, which keeps the buckets short and the operations fast.',
+  'Collisions happen when two different keys produce the same index. Chaining resolves them by storing a linked list of entries in each bucket, while open addressing probes for the next free slot in the array. Both strategies degrade toward linear time when too many keys pile into the same region.',
+  'The load factor is the number of stored entries divided by the number of buckets. When it crosses a threshold, commonly 0.75, the table performs rehashing: it allocates a larger array and reinserts every entry. Rehashing is expensive, but it happens rarely enough that insertions stay amortized constant time.',
+  'A stack follows the last-in, first-out principle, so the most recently pushed element is the first one removed. Function calls, undo operations, and expression evaluation all rely on stacks. A queue, by contrast, is first-in, first-out, which suits scheduling, buffering, and breadth-first search.',
+  'A binary search tree keeps smaller keys in the left subtree and larger keys in the right subtree. Searching therefore discards half of the remaining nodes at each step when the tree is balanced. Self-balancing variants such as AVL trees and red-black trees guarantee logarithmic height even for sorted input.'
+].join('\n\n');
