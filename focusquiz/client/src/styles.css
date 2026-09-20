@@ -127,7 +127,7 @@ input[type='number'] { width: 7rem; }
   border-radius: 8px;
   cursor: pointer;
 }
-.chunk p { margin: 0; font: 400 1.15rem/1.8 var(--serif); }
+.chunk p { margin: 0; font: 400 1.15rem/1.8 var(--serif); white-space: pre-line; }
 .chunk.current { border-color: var(--focus); border-left-color: color-mix(in srgb, var(--away) var(--heat, 0%), var(--focus)); }
 .chunk-no { position: absolute; left: 1.1rem; top: 1.45rem; font: 600 0.85rem var(--sans); color: var(--muted); }
 .chunk-flag { display: block; margin-top: 0.9rem; font-size: 0.82rem; font-weight: 500; color: var(--away); }
