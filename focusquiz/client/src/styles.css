@@ -195,3 +195,8 @@ th { font-weight: 500; color: var(--muted); }
 .history li { padding: 0.7rem 0.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
 .history-head { display: flex; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.85rem; color: var(--muted); }
 .history-head b { color: var(--ink); }
+/* ---------- study material sources ---------- */
+.sources { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0.6rem 0; }
+.sources input[type='text'] { flex: 1; min-width: 200px; width: auto; }
+.file-btn { display: inline-block; }
+.btn:disabled { opacity: 0.5; cursor: default; }
