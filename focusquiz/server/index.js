@@ -86,6 +86,34 @@ app.get('/api/sessions', requireClient, async (req, res) => {
   }
 });
 
+app.post(
+  '/api/extract',
+  limiter(30, 10 * 60 * 1000),
+  (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+      if (!err) return next();
+      const tooBig = err.code === 'LIMIT_FILE_SIZE';
+      res.status(tooBig ? 413 : 400).json({ error: tooBig ? 'File is over 10 MB.' : 'Upload failed.' });
+    });
+  },
+  async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'Choose a file to upload.' });
+    try {
+      res.json(await extractFile(req.file));
+    } catch (err) {
+      res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not read that file.' });
+    }
+  }
+);
+
+app.get('/api/youtube', limiter(20, 10 * 60 * 1000), async (req, res) => {
+  try {
+    res.json(await youtubeToText(String(req.query.url || '')));
+  } catch (err) {
+    res.status(err.status || 502).json({ error: err.status ? err.message : 'Could not fetch the transcript.' });
+  }
+});
+
 // Serve the built client in production (npm start).
 const dist = path.join(here, '..', 'client', 'dist');
 if (fs.existsSync(dist)) {
