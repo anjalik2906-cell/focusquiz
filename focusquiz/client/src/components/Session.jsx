@@ -1,10 +1,11 @@
-import { Fragment, useEffect, useState, useSyncExternalStore } from 'react';
+import { Fragment, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Bar from './Bar.jsx';
 import Trace from './Trace.jsx';
 import QuizCard from './QuizCard.jsx';
 import { fmt } from '../lib/format.js';
 
 const STATUS_LABEL = { focused: 'Focused', away: 'Away', idle: 'Idle' };
+const canNotify = typeof window !== 'undefined' && 'Notification' in window;
 
 function nearestChunk() {
   const mid = window.innerHeight / 2;
@@ -25,6 +26,10 @@ export default function Session({ engine, onEnd }) {
   const snap = useSyncExternalStore(engine.subscribe, engine.getSnapshot);
   const [quiz, setQuiz] = useState(null);
   const [flash, setFlash] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [perm, setPerm] = useState(canNotify ? Notification.permission : 'unsupported');
+  const originalTitle = useRef(document.title);
+  const notified = useRef(false);
 
   useEffect(() => {
     engine.setTriggerHandler(setQuiz);
@@ -57,6 +62,43 @@ export default function Session({ engine, onEnd }) {
     };
   }, [engine]);
 
+  // Alert 1: a banner at the top whenever a distraction, burst of switches or idle period is detected.
+  const alertId = snap.lastAlert ? snap.lastAlert.id : 0;
+  useEffect(() => {
+    if (!snap.lastAlert) return;
+    setToast(snap.lastAlert);
+    const t = setTimeout(() => setToast(null), 7000);
+    return () => clearTimeout(t);
+  }, [alertId]);
+
+  // Alert 2: while you are on another tab, the tab title tells you to come back.
+  const awayTooLong = snap.status === 'away' && snap.awayNow >= engine.cfg.distractMs;
+  useEffect(() => {
+    document.title = awayTooLong ? `⚠ Come back! Away ${fmt(snap.awayNow)}` : originalTitle.current;
+  }, [awayTooLong, snap.awayNow]);
+  useEffect(() => () => { document.title = originalTitle.current; }, []);
+
+  // Alert 3: an optional desktop notification, once per absence, that also works from another tab.
+  useEffect(() => {
+    if (snap.status !== 'away') {
+      notified.current = false;
+      return;
+    }
+    if (awayTooLong && !notified.current && canNotify && Notification.permission === 'granted') {
+      notified.current = true;
+      const n = new Notification('Come back to your study', {
+        body: `You have been away ${fmt(snap.awayNow)}. You were on chunk ${snap.cur + 1}.`,
+        tag: 'focusquiz'
+      });
+      n.onclick = () => {
+        window.focus();
+        n.close();
+      };
+    }
+  }, [snap.status, awayTooLong, snap.awayNow]);
+
+  const enableAlerts = () => Notification.requestPermission().then(setPerm);
+
   const closeQuiz = () => {
     engine.closeQuiz();
     setQuiz(null);
@@ -84,6 +126,15 @@ export default function Session({ engine, onEnd }) {
           {fmt(snap.focused)} of {fmt(snap.goalMs)} focused
         </span>
       </Bar>
+
+      {toast && (
+        <div className="toast" role="alert">
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} aria-label="Dismiss alert">
+            ×
+          </button>
+        </div>
+      )}
 
       <div className="shell session">
         <main className="reader">
@@ -140,6 +191,13 @@ export default function Session({ engine, onEnd }) {
               <dd>{snap.idleEvents}</dd>
             </div>
           </dl>
+
+          {perm === 'default' && (
+            <button className="btn btn-quiet" onClick={enableAlerts}>
+              Turn on desktop alerts
+            </button>
+          )}
+          {perm === 'denied' && <p className="muted small">Desktop alerts are blocked. Allow notifications for this site in your browser settings.</p>}
 
           {engine.cfg.demo && (
             <div className="demo">
