@@ -3,7 +3,7 @@ import Bar from './Bar.jsx';
 import History from './History.jsx';
 import { SAMPLE_TEXT } from '../lib/sample.js';
 import { chunkText } from '../lib/chunker.js';
-import { extractFile, fetchYoutube } from '../lib/api.js';
+import { extractFile, fetchLink } from '../lib/api.js';
 
 const MAX_COMFORTABLE_CHUNKS = 40;
 
