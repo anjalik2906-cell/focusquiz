@@ -1,5 +1,6 @@
 import { computeScore } from './score.js';
 import { buildInsights } from './insights.js';
+import { fmt } from './format.js';
 
 // All focus-tracking logic lives here, free of React and the DOM, so it can be unit tested
 // with a fake clock. The UI feeds it events (leave, comeBack, activity, tick) and renders
@@ -33,6 +34,8 @@ export class SessionEngine {
     this.quizLog = [];
     this.running = true;
     this.nextQuizId = 1;
+    this.lastAlert = null; // newest alert: { id, kind, message }, shown as a toast by the UI
+    this.nextAlertId = 1;
     this.listeners = new Set();
     this.triggerHandler = () => {};
     this.subscribe = this.subscribe.bind(this);
@@ -60,6 +63,9 @@ export class SessionEngine {
   // Session clock: real elapsed time plus any simulated time.
   vnow() {
     return this.clock() - this.startAt + this.simMs;
+  }
+  raise(kind, message) {
+    this.lastAlert = { id: this.nextAlertId++, kind, message };
   }
   log(event, extra = {}) {
     this.events.push({ event, timestamp: this.clock(), ...extra });
@@ -121,6 +127,7 @@ export class SessionEngine {
       this.chunks[idx].distractions++;
       this.distractTimes.push(start);
       this.log('distraction', { awayMs: away, chunk: idx });
+      this.raise('distraction', `Distraction detected. You were away ${fmt(away)}.`);
       this.trigger(idx, 'Welcome back', away >= longMs ? 'concept' : 'recall', away);
     } else {
       // Several short switches inside a window is fragmented attention.
@@ -132,6 +139,7 @@ export class SessionEngine {
         this.shortSwitches = [];
         this.chunks[idx].distractions++;
         this.log('fragmented', { chunk: idx });
+        this.raise('fragmented', 'Lots of quick tab switches. Try to stay on one tab.');
         this.trigger(idx, 'Lots of quick switches', 'recall', away);
       }
     }
@@ -173,6 +181,7 @@ export class SessionEngine {
         this.idle = true;
         this.idleEvents++;
         this.log('idle');
+        this.raise('idle', 'No activity for a while. Still studying?');
         this.trigger(this.cur, 'Still with us?', 'recall', 0);
       }
       if (!this.idle) this.chunks[this.cur].dwell += 1;
@@ -205,6 +214,8 @@ export class SessionEngine {
     return {
       running: this.running,
       status: this.leftAt != null ? 'away' : this.idle ? 'idle' : 'focused',
+      awayNow, // ms since the tab was left, 0 while present
+      lastAlert: this.lastAlert,
       total,
       focused: Math.max(0, total - this.awayMs - awayNow),
       goalMs: this.goalMs,
