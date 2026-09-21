@@ -11,6 +11,7 @@ dotenv.config({ path: path.join(here, '..', '.env') });
 const { aiEnabled, generateQuiz } = await import('./quiz.js');
 const { saveSession, listSessions, storageKind } = await import('./store.js');
 const { upload, extractFile, youtubeToText } = await import('./extract.js');
+const { linkToText } = await import('./webpage.js');
 
 const app = express();
 app.use(cors());
