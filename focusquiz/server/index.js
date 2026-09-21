@@ -115,6 +115,13 @@ app.get('/api/youtube', limiter(20, 10 * 60 * 1000), async (req, res) => {
   }
 });
 
+app.get('/api/link', limiter(20, 10 * 60 * 1000), async (req, res) => {
+  try {
+    res.json(await linkToText(String(req.query.url || '')));
+  } catch (err) {
+    res.status(err.status || 502).json({ error: err.status ? err.message : 'Could not load that link.' });
+  }
+});
 // Serve the built client in production (npm start).
 const dist = path.join(here, '..', 'client', 'dist');
 if (fs.existsSync(dist)) {
