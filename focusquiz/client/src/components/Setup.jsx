@@ -37,7 +37,13 @@ export default function Setup({ health, history, onStart }) {
   };
 
   const onYoutube = () => {
-    if (ytUrl.trim()) load(() => fetchYoutube(ytUrl), () => 'Loaded the video transcript. Each block starts with its timestamp.');
+    if (ytUrl.trim()) {
+      load(() => fetchLink(ytUrl), (r) =>
+        r.videoId
+          ? 'Loaded the video transcript. Each block starts with its timestamp.'
+          : `Loaded ${r.title}. Trim the text below if you only want part of it.`
+      );
+    }
   };
 
   const start = () => {
@@ -56,7 +62,7 @@ export default function Setup({ health, history, onStart }) {
         <section className="setup-main">
           <h1>What are you studying?</h1>
           <p className="lede">
-            Paste your notes, upload a file, or load a YouTube video. FocusQuiz splits it into chunks, notices when your
+            Paste your notes, upload a file, or load a link (YouTube video, article or web page). FocusQuiz splits it into chunks, notices when your
             attention leaves the tab, and quizzes you on the part you were on when you drifted.
           </p>
 
@@ -73,11 +79,11 @@ export default function Setup({ health, history, onStart }) {
               value={ytUrl}
               onChange={(e) => setYtUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && onYoutube()}
-              placeholder="Paste a YouTube link"
-              aria-label="YouTube link"
+              placeholder="Paste a link: YouTube video, article or web page"
+              aria-label="Link"
             />
             <button className="btn btn-quiet" onClick={onYoutube} disabled={source.busy || !ytUrl.trim()}>
-              Load transcript
+              Load link
             </button>
           </div>
           <p className="muted small" role="status">
