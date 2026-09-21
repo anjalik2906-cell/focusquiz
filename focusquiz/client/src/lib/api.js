@@ -55,3 +55,7 @@ export async function extractFile(file) {
 export async function fetchYoutube(url) {
   return readJson(await fetch(`/api/youtube?url=${encodeURIComponent(url)}`), 'Could not fetch the transcript');
 }
+// Any link: a YouTube video (transcript) or a web page / PDF (readable text). Returns { title, text }.
+export async function fetchLink(url) {
+  return readJson(await fetch(`/api/link?url=${encodeURIComponent(url)}`), 'Could not load that link');
+}
