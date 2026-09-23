@@ -48,7 +48,9 @@ export default function App() {
     refreshHistory();
   };
 
+    const deleteFromHistory = (id) => setHistory((h) => ({ ...h, items: h.items.filter((s) => s.id !== id) }));
+
   if (phase === 'session') return <Session engine={engine} onEnd={end} />;
   if (phase === 'dashboard') return <Dashboard summary={summary} onNew={again} />;
-  return <Setup health={health} history={history} onStart={start} />;
+  return <Setup health={health} history={history} onStart={start} onDeleted={deleteFromHistory} />;
 }

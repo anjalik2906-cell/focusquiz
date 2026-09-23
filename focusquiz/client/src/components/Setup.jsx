@@ -7,7 +7,7 @@ import { extractFile, fetchLink } from '../lib/api.js';
 
 const MAX_COMFORTABLE_CHUNKS = 40;
 
-export default function Setup({ health, history, onStart }) {
+export default function Setup({ health, history, onStart, onDeleted }) {
   const [text, setText] = useState('');
   const [goalMin, setGoalMin] = useState(25);
   const [demo, setDemo] = useState(true);
@@ -141,7 +141,7 @@ export default function Setup({ health, history, onStart }) {
 
         <section className="setup-history">
           <h2>Recent sessions</h2>
-          <History history={history} />
+                    <History history={history} onDeleted={onDeleted} />
         </section>
       </main>
     </>

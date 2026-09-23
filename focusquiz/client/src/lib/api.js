@@ -59,3 +59,10 @@ export async function fetchYoutube(url) {
 export async function fetchLink(url) {
   return readJson(await fetch(`/api/link?url=${encodeURIComponent(url)}`), 'Could not load that link');
 }
+// Deletes one saved session. Returns true if it was removed.
+export async function deleteSession(id) {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'x-client-id': clientId() } });
+  if (res.status === 404) return false;
+  if (!res.ok) throw new Error(`Could not delete session (${res.status})`);
+  return true;
+}
