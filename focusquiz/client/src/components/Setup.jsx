@@ -136,13 +136,7 @@ export default function Setup({ health, history, onStart }) {
             </button>
           </div>
 
-          <p className="muted small">
-            {health == null
-              ? 'Checking the server...'
-              : health.ai
-                ? 'Questions are written by Claude. Only the chunk you were reading is sent to the AI.'
-                : 'AI questions are off, so you will get local practice questions. Add ANTHROPIC_API_KEY on the server to turn them on.'}
-          </p>
+
         </section>
 
         <section className="setup-history">
